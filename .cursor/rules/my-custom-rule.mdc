@@ -1,0 +1,6 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+不要写那么多readme和测试文件。
