@@ -1,7 +1,15 @@
 services:
-  comfyui-worker:
-    image: runpod/worker-comfyui:dev
-    pull_policy: never
+  infinite-talk-comfyui-worker:
+    build: .
+    container_name: infinite-talk-worker
+    environment:
+      - SERVE_API_LOCALLY=true
+      - COMFY_LOG_LEVEL=INFO
+    ports:
+      - "8000:8000"
+      - "8188:8188"
+    volumes:
+      - ./data/runpod-volume:/workspace
     deploy:
       resources:
         reservations:
@@ -9,11 +17,4 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-    environment:
-      - SERVE_API_LOCALLY=true
-    ports:
-      - "8000:8000"
-      - "8188:8188"
-    volumes:
-      - ./data/comfyui/output:/comfyui/output
-      - ./data/runpod-volume:/runpod-volume
+    restart: unless-stopped
