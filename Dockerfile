@@ -35,23 +35,16 @@ RUN apt-get update && apt-get install -y \
 # Clean up to reduce image size
 RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# Install uv (latest) using official installer and create isolated venv
-RUN wget -qO- https://astral.sh/uv/install.sh | sh \
-    && ln -s /root/.local/bin/uv /usr/local/bin/uv \
-    && ln -s /root/.local/bin/uvx /usr/local/bin/uvx \
-    && uv venv /opt/venv
+# === MODIFIED FOR VOLUME-BASED DEPLOYMENT ===
+# Original version created /opt/venv here with uv
+# We now use ComfyUI's pre-existing venv from /workspace/ComfyUI/com_venv
+# This significantly reduces image size and ensures consistency with the volume environment
 
-# Use the virtual environment for all subsequent commands
-ENV PATH="/opt/venv/bin:${PATH}"
+# Install curl for health checks in start.sh
+RUN apt-get update && apt-get install -y curl && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Skip ComfyUI installation - we'll use the existing one from network volume
-# Only install Python dependencies for the handler
-RUN uv pip install pip setuptools wheel
-
-# Upgrade PyTorch if needed (for newer CUDA versions)
-RUN if [ "$ENABLE_PYTORCH_UPGRADE" = "true" ]; then \
-      uv pip install --force-reinstall torch torchvision torchaudio --index-url ${PYTORCH_INDEX_URL}; \
-    fi
+# Ensure basic Python tools are available at system level (fallback only)
+RUN python3.12 -m pip install --upgrade pip setuptools wheel 2>/dev/null || true
 
 # Set working directory to root
 WORKDIR /
@@ -59,8 +52,11 @@ WORKDIR /
 # Copy model path configuration (will be placed in the volume later)
 COPY src/extra_model_paths.yaml /tmp/extra_model_paths.yaml
 
-# Install Python runtime dependencies for the handler
-RUN uv pip install runpod requests websocket-client
+# === COMMENTED OUT: Dependencies are pre-installed in ComfyUI's venv from volume ===
+# # Install Python runtime dependencies for the handler
+# RUN uv pip install runpod requests websocket-client
+# === END COMMENTED SECTION ===
+# Note: runpod, requests, websocket-client must be pre-installed in /workspace/ComfyUI/com_venv
 
 # Add application code and scripts
 ADD src/start.sh handler.py test_input.json ./
