@@ -163,14 +163,7 @@ Key configuration options:
 - `COMFY_LOG_LEVEL`: ComfyUI log level (default: INFO)
 - `REFRESH_WORKER`: Force worker refresh after each job
 - `WEBSOCKET_RECONNECT_ATTEMPTS`: WebSocket reconnect attempts (default: 5)
-- `WEBSOCKET_RECONNECT_DELAY_S`: Delay between reconnect attempts (default: 3)
-
-For S3 uploads:
-- `S3_BUCKET_NAME`: Target S3 bucket
-- `S3_BUCKET_CREDS_ACCESS_KEY_ID`: AWS access key
-- `S3_BUCKET_CREDS_SECRET_ACCESS_KEY`: AWS secret key
-- `S3_ENDPOINT_URL`: S3 endpoint (optional)
-- `S3_PREFIX`: Path prefix in bucket (optional)
+- `WEBSOCKET_RECONNECT_DELAY_S`: Delay between reconnect attempts (default: 3)s
 
 ## Machine Learning Context
 

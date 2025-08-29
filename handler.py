@@ -150,15 +150,10 @@ def validate_input(job_input):
         except json.JSONDecodeError:
             return None, "Invalid JSON format in input"
 
-    # Validate 'workflow_name' in input (required)
-    workflow_name = job_input.get("workflow_name")
-    if workflow_name is None:
-        return None, "Missing 'workflow_name' parameter"
-
-    # Validate workflow_name is supported
-    supported_workflows = ["flux-dev-checkpoint-example", "wanvideo-I2V-InfiniteTalk-luao"]
-    if workflow_name not in supported_workflows:
-        return None, f"Unsupported workflow_name. Supported: {', '.join(supported_workflows)}"
+    # Validate 'workflow' in input (required)
+    workflow = job_input.get("workflow")
+    if workflow is None:
+        return None, "Missing 'workflow' parameter"
 
     # Validate 'images' in input (optional)
     images = job_input.get("images")
@@ -179,46 +174,10 @@ def validate_input(job_input):
 
     # Return validated data and no error
     return {
-        "workflow_name": workflow_name,
+        "workflow": workflow,
         "images": images,
         "audio": audio
     }, None
-
-
-def load_workflow(workflow_name):
-    """
-    Load a workflow from the volume based on workflow name.
-
-    Args:
-        workflow_name (str): Name of the workflow to load
-
-    Returns:
-        dict: The workflow JSON data
-
-    Raises:
-        ValueError: If workflow cannot be found or loaded
-    """
-    # Map workflow names to file paths
-    workflow_files = {
-        "flux-dev-checkpoint-example": "/runpod-volume/workflows/flux_dev_checkpoint_example.json",
-        "wanvideo-I2V-InfiniteTalk-luao": "/runpod-volume/workflows/wanvideo_I2V_InfiniteTalk_luao.json"
-    }
-
-    if workflow_name not in workflow_files:
-        raise ValueError(f"Unsupported workflow: {workflow_name}")
-
-    workflow_path = workflow_files[workflow_name]
-
-    try:
-        with open(workflow_path, 'r') as f:
-            workflow = json.load(f)
-        print(f"worker-comfyui - Successfully loaded workflow: {workflow_name}")
-        return workflow
-    except FileNotFoundError:
-        raise ValueError(f"Workflow file not found: {workflow_path}")
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON in workflow file {workflow_path}: {e}")
-
 
 def upload_audio(audio):
     """
@@ -237,7 +196,7 @@ def upload_audio(audio):
         return {"status": "success", "message": "No audio to upload"}
 
     try:
-        name = audio["data"]
+        name = audio["name"]
         audio_data = audio["data"]
 
         # Handle base64 data (remove data URI prefix if present)
@@ -637,15 +596,9 @@ def handler(job):
         return {"error": error_message}
 
     # Extract validated data
-    workflow_name = validated_data["workflow_name"]
+    workflow = validated_data["workflow"]
     input_images = validated_data.get("images")
     input_audio = validated_data.get("audio")
-
-    # Load the selected workflow
-    try:
-        workflow = load_workflow(workflow_name)
-    except ValueError as e:
-        return {"error": str(e)}
 
     # Make sure that the ComfyUI HTTP API is available before proceeding
     if not check_server(
