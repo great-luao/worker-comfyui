@@ -61,20 +61,53 @@ WORKDIR /
 ADD src/start.sh handler.py test_input.json ./
 RUN chmod +x /start.sh
 
-# Add script to install custom nodes
-COPY scripts/comfy-node-install.sh /usr/local/bin/comfy-node-install
-RUN chmod +x /usr/local/bin/comfy-node-install
+# Add debug information during build
+RUN echo "=== Build Debug Info ===" && \
+    echo "Python version:" && python --version && \
+    echo "Current directory:" && pwd && \
+    echo "Files in root:" && ls -la / | head -20
 
-# Prevent pip from asking for confirmation during uninstall steps in custom nodes
-ENV PIP_NO_INPUT=1
+# Create a debug wrapper script
+RUN echo '#!/bin/bash' > /debug_start.sh && \
+    echo 'echo "========================================="' >> /debug_start.sh && \
+    echo 'echo "=== Container Starting at $(date) ==="' >> /debug_start.sh && \
+    echo 'echo "========================================="' >> /debug_start.sh && \
+    echo 'echo ""' >> /debug_start.sh && \
+    echo 'echo "=== Environment Variables ==="' >> /debug_start.sh && \
+    echo 'echo "RUNPOD_POD_ID: $RUNPOD_POD_ID"' >> /debug_start.sh && \
+    echo 'echo "RUNPOD_GPU_COUNT: $RUNPOD_GPU_COUNT"' >> /debug_start.sh && \
+    echo 'echo "WORKSPACE: $WORKSPACE"' >> /debug_start.sh && \
+    echo 'echo "PWD: $(pwd)"' >> /debug_start.sh && \
+    echo 'echo ""' >> /debug_start.sh && \
+    echo 'echo "=== Checking /workspace directory ==="' >> /debug_start.sh && \
+    echo 'if [ -d "/workspace" ]; then' >> /debug_start.sh && \
+    echo '    echo "Contents of /workspace:"' >> /debug_start.sh && \
+    echo '    ls -la /workspace/ | head -10' >> /debug_start.sh && \
+    echo 'else' >> /debug_start.sh && \
+    echo '    echo "/workspace directory NOT FOUND"' >> /debug_start.sh && \
+    echo 'fi' >> /debug_start.sh && \
+    echo 'echo ""' >> /debug_start.sh && \
+    echo 'echo "=== Checking for ComfyUI ==="' >> /debug_start.sh && \
+    echo 'if [ -f "/workspace/ComfyUI/main.py" ]; then' >> /debug_start.sh && \
+    echo '    echo "✓ Found ComfyUI at /workspace/ComfyUI"' >> /debug_start.sh && \
+    echo 'else' >> /debug_start.sh && \
+    echo '    echo "✗ ComfyUI NOT found at /workspace/ComfyUI"' >> /debug_start.sh && \
+    echo '    echo "Searching for main.py in other locations:"' >> /debug_start.sh && \
+    echo '    find / -name "main.py" -path "*/ComfyUI/*" 2>/dev/null | head -5' >> /debug_start.sh && \
+    echo 'fi' >> /debug_start.sh && \
+    echo 'echo ""' >> /debug_start.sh && \
+    echo 'echo "=== Checking for virtual environment ==="' >> /debug_start.sh && \
+    echo 'if [ -d "/workspace/ComfyUI/com_venv" ]; then' >> /debug_start.sh && \
+    echo '    echo "✓ Found venv at /workspace/ComfyUI/com_venv"' >> /debug_start.sh && \
+    echo 'else' >> /debug_start.sh && \
+    echo '    echo "✗ Virtual environment NOT found"' >> /debug_start.sh && \
+    echo 'fi' >> /debug_start.sh && \
+    echo 'echo ""' >> /debug_start.sh && \
+    echo 'echo "=== Starting actual application ==="' >> /debug_start.sh && \
+    echo 'exec /start.sh' >> /debug_start.sh && \
+    chmod +x /debug_start.sh
 
-# Copy helper script to switch Manager network mode at container start
-COPY scripts/comfy-manager-set-mode.sh /usr/local/bin/comfy-manager-set-mode
-RUN chmod +x /usr/local/bin/comfy-manager-set-mode
-
-# Set the default command to run when starting the container
-CMD ["/start.sh"]
+# Set the default command to run the debug wrapper
+CMD ["/debug_start.sh"]
 
 # No need for model download stage since we use network volume
-# Final stage is just the base stage
-FROM base AS final

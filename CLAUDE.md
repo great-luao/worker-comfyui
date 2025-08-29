@@ -16,6 +16,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 更灵活的模型管理（直接在 volume 中添加/更新）
 - 更快的部署和启动时间
 
+## 最新进展 (2024-08-29)
+
+### 已完成的优化
+1. **依赖检测修复**：修正了虚拟环境依赖检测，使用完整路径 `/workspace/ComfyUI/com_venv/bin/python`
+2. **移除冗余配置**：
+   - 删除了 extra_model_paths.yaml 操作（直接使用 ComfyUI 默认路径）
+   - 移除了 ComfyUI-Manager 相关代码（volume 中未安装）
+   - 删除了 custom node 安装脚本
+3. **Docker 优化**：
+   - 移除了多余的多阶段构建（`FROM base AS final`）
+   - 更新 container name 为 `worker-comfyui`
+   - 修正 volume 挂载路径为 `/workspace/ComfyUI:/workspace/ComfyUI`
+4. **超时配置**：延长 ComfyUI 初始化超时到 5 分钟，检测间隔 30 秒
+5. **调试增强**：添加了 debug_start.sh 脚本用于诊断容器启动问题
+
+### 已知依赖要求
+ComfyUI 虚拟环境 (`/workspace/ComfyUI/com_venv`) 必须预装以下包：
+- runpod
+- requests  
+- websocket-client
+- paramiko (runpod 依赖)
+- aiohttp-retry (runpod 依赖)
+- boto3 (runpod 依赖)
+- fastapi[all] (runpod 依赖)
+
+### 测试状态
+- ✅ 本地 docker-compose 测试成功
+- ✅ FLUX 模型工作流测试通过（耗时约 4 分钟）
+- ⚠️ RunPod serverless 部署需要进一步调试（容器创建失败问题）
+
 ## Project Overview
 
 This is a RunPod serverless worker for ComfyUI - it allows running ComfyUI workflows as serverless API endpoints on the RunPod platform. The worker handles workflow execution, image processing, and optional S3 uploads.

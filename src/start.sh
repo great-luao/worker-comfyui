@@ -63,11 +63,6 @@ echo "✅ All API dependencies verified"
 
 # Extra model paths removed - using ComfyUI's default model paths
 
-# Set ComfyUI-Manager to offline mode if exists
-if [ -d "$COMFYUI_PATH/custom_nodes/ComfyUI-Manager" ]; then
-    comfy-manager-set-mode offline || echo "Could not set ComfyUI-Manager to offline mode"
-fi
-
 # Set log level
 : "${COMFY_LOG_LEVEL:=INFO}"
 
