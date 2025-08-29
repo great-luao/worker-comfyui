@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 更灵活的模型管理（直接在 volume 中添加/更新）
 - 更快的部署和启动时间
 
-## 最新进展 (2024-08-29)
+## 最新进展 (2025-08-29)
 
 ### 已完成的优化
 1. **依赖检测修复**：修正了虚拟环境依赖检测，使用完整路径 `/runpod-volume/ComfyUI/com_venv/bin/python`
