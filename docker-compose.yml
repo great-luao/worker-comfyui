@@ -9,7 +9,7 @@ services:
       - "8000:8000"
       - "8188:8188"
     volumes:
-      - /workspace/ComfyUI:/workspace/ComfyUI
+      - /runpod-volume/ComfyUI:/runpod-volume/ComfyUI
     deploy:
       resources:
         reservations:

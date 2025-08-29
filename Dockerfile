@@ -37,7 +37,7 @@ RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 # === MODIFIED FOR VOLUME-BASED DEPLOYMENT ===
 # Original version created /opt/venv here with uv
-# We now use ComfyUI's pre-existing venv from /workspace/ComfyUI/com_venv
+# We now use ComfyUI's pre-existing venv from /runpod-volume/ComfyUI/com_venv
 # This significantly reduces image size and ensures consistency with the volume environment
 
 # Install curl for health checks in start.sh
@@ -55,10 +55,10 @@ WORKDIR /
 # # Install Python runtime dependencies for the handler
 # RUN uv pip install runpod requests websocket-client
 # === END COMMENTED SECTION ===
-# Note: runpod, requests, websocket-client must be pre-installed in /workspace/ComfyUI/com_venv
+# Note: runpod, requests, websocket-client must be pre-installed in /runpod-volume/ComfyUI/com_venv
 
 # Add application code and scripts
-ADD src/start.sh handler.py test_input.json ./
+ADD src/start.sh handler.py test_resources/test_input.json ./
 RUN chmod +x /start.sh
 
 # Add debug information during build
@@ -79,26 +79,26 @@ RUN echo '#!/bin/bash' > /debug_start.sh && \
     echo 'echo "WORKSPACE: $WORKSPACE"' >> /debug_start.sh && \
     echo 'echo "PWD: $(pwd)"' >> /debug_start.sh && \
     echo 'echo ""' >> /debug_start.sh && \
-    echo 'echo "=== Checking /workspace directory ==="' >> /debug_start.sh && \
-    echo 'if [ -d "/workspace" ]; then' >> /debug_start.sh && \
-    echo '    echo "Contents of /workspace:"' >> /debug_start.sh && \
-    echo '    ls -la /workspace/ | head -10' >> /debug_start.sh && \
+    echo 'echo "=== Checking /runpod-volume directory ==="' >> /debug_start.sh && \
+    echo 'if [ -d "/runpod-volume" ]; then' >> /debug_start.sh && \
+    echo '    echo "Contents of /runpod-volume:"' >> /debug_start.sh && \
+    echo '    ls -la /runpod-volume/ | head -10' >> /debug_start.sh && \
     echo 'else' >> /debug_start.sh && \
-    echo '    echo "/workspace directory NOT FOUND"' >> /debug_start.sh && \
+    echo '    echo "/runpod-volume directory NOT FOUND"' >> /debug_start.sh && \
     echo 'fi' >> /debug_start.sh && \
     echo 'echo ""' >> /debug_start.sh && \
     echo 'echo "=== Checking for ComfyUI ==="' >> /debug_start.sh && \
-    echo 'if [ -f "/workspace/ComfyUI/main.py" ]; then' >> /debug_start.sh && \
-    echo '    echo "✓ Found ComfyUI at /workspace/ComfyUI"' >> /debug_start.sh && \
+    echo 'if [ -f "/runpod-volume/ComfyUI/main.py" ]; then' >> /debug_start.sh && \
+    echo '    echo "✓ Found ComfyUI at /runpod-volume/ComfyUI"' >> /debug_start.sh && \
     echo 'else' >> /debug_start.sh && \
-    echo '    echo "✗ ComfyUI NOT found at /workspace/ComfyUI"' >> /debug_start.sh && \
+    echo '    echo "✗ ComfyUI NOT found at /runpod-volume/ComfyUI"' >> /debug_start.sh && \
     echo '    echo "Searching for main.py in other locations:"' >> /debug_start.sh && \
     echo '    find / -name "main.py" -path "*/ComfyUI/*" 2>/dev/null | head -5' >> /debug_start.sh && \
     echo 'fi' >> /debug_start.sh && \
     echo 'echo ""' >> /debug_start.sh && \
     echo 'echo "=== Checking for virtual environment ==="' >> /debug_start.sh && \
-    echo 'if [ -d "/workspace/ComfyUI/com_venv" ]; then' >> /debug_start.sh && \
-    echo '    echo "✓ Found venv at /workspace/ComfyUI/com_venv"' >> /debug_start.sh && \
+    echo 'if [ -d "/runpod-volume/ComfyUI/com_venv" ]; then' >> /debug_start.sh && \
+    echo '    echo "✓ Found venv at /runpod-volume/ComfyUI/com_venv"' >> /debug_start.sh && \
     echo 'else' >> /debug_start.sh && \
     echo '    echo "✗ Virtual environment NOT found"' >> /debug_start.sh && \
     echo 'fi' >> /debug_start.sh && \

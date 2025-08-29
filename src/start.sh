@@ -16,28 +16,28 @@ PYTHON_CMD=""
 
 # Check for ComfyUI in volume
 echo "🔍 Checking for ComfyUI in volume..."
-if [ ! -f "/workspace/ComfyUI/main.py" ]; then
-    echo "❌ ERROR: ComfyUI main.py not found at /workspace/ComfyUI/main.py"
+if [ ! -f "/runpod-volume/ComfyUI/main.py" ]; then
+    echo "❌ ERROR: ComfyUI main.py not found at /runpod-volume/ComfyUI/main.py"
     echo "Please ensure your network volume is properly mounted."
     exit 1
 fi
 
-if [ ! -d "/workspace/ComfyUI/com_venv" ]; then
-    echo "❌ ERROR: Virtual environment not found at /workspace/ComfyUI/com_venv"
+if [ ! -d "/runpod-volume/ComfyUI/com_venv" ]; then
+    echo "❌ ERROR: Virtual environment not found at /runpod-volume/ComfyUI/com_venv"
     echo "Please ensure ComfyUI virtual environment is properly set up."
     exit 1
 fi
 
-if [ ! -f "/workspace/ComfyUI/com_venv/bin/python" ]; then
+if [ ! -f "/runpod-volume/ComfyUI/com_venv/bin/python" ]; then
     echo "❌ ERROR: Python executable not found in virtual environment"
     exit 1
 fi
 
-echo "✅ Found ComfyUI in volume: /workspace/ComfyUI"
-COMFYUI_PATH="/workspace/ComfyUI"
+echo "✅ Found ComfyUI in volume: /runpod-volume/ComfyUI"
+COMFYUI_PATH="/runpod-volume/ComfyUI"
 
 # Activate virtual environment
-export VIRTUAL_ENV="/workspace/ComfyUI/com_venv"
+export VIRTUAL_ENV="/runpod-volume/ComfyUI/com_venv"
 export PATH="$VIRTUAL_ENV/bin:$PATH"
 PYTHON_CMD="python"
 echo "✅ Activated virtual environment: $VIRTUAL_ENV"
@@ -51,9 +51,9 @@ $PYTHON_CMD -c "import torch; print(f'  CUDA Available: {torch.cuda.is_available
 # Verify API dependencies are installed (no installation, just check)
 echo "📥 Verifying API dependencies..."
 # Use full path to ensure we're using the correct Python from venv
-if ! /workspace/ComfyUI/com_venv/bin/python -c "import runpod; import requests; import websocket" 2>/dev/null; then
+if ! /runpod-volume/ComfyUI/com_venv/bin/python -c "import runpod; import requests; import websocket" 2>/dev/null; then
     echo "❌ ERROR: Required API dependencies not found in virtual environment!"
-    echo "Please ensure the following packages are installed in /workspace/ComfyUI/com_venv:"
+    echo "Please ensure the following packages are installed in /runpod-volume/ComfyUI/com_venv:"
     echo "  - runpod (with its dependencies: paramiko, aiohttp-retry, boto3, fastapi)"
     echo "  - requests"
     echo "  - websocket-client"

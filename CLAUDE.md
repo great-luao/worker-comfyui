@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 我们的目标是将这个 RunPod ComfyUI worker 项目与我们在 network volume 中预装的 ComfyUI 实例结合，实现 serverless 部署。具体来说：
 
-1. **Volume 集成策略**：不在 Docker 镜像中包含 ComfyUI，而是依赖挂载的 network volume 中的 ComfyUI（位于 `/workspace/ComfyUI`）
+1. **Volume 集成策略**：不在 Docker 镜像中包含 ComfyUI，而是依赖挂载的 network volume 中的 ComfyUI（位于 `/runpod-volume/ComfyUI`）
 2. **Serverless 适配**：通过修改 Dockerfile 和启动脚本，让 worker 能够自动检测并使用 volume 中的 ComfyUI 环境
 3. **最近的改动**（参考 commit `c9e5f18`）：已经调整了 Dockerfile 跳过 ComfyUI 安装步骤，改为直接使用 volume 中的现有安装
 
@@ -19,7 +19,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 最新进展 (2024-08-29)
 
 ### 已完成的优化
-1. **依赖检测修复**：修正了虚拟环境依赖检测，使用完整路径 `/workspace/ComfyUI/com_venv/bin/python`
+1. **依赖检测修复**：修正了虚拟环境依赖检测，使用完整路径 `/runpod-volume/ComfyUI/com_venv/bin/python`
 2. **移除冗余配置**：
    - 删除了 extra_model_paths.yaml 操作（直接使用 ComfyUI 默认路径）
    - 移除了 ComfyUI-Manager 相关代码（volume 中未安装）
@@ -27,12 +27,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. **Docker 优化**：
    - 移除了多余的多阶段构建（`FROM base AS final`）
    - 更新 container name 为 `worker-comfyui`
-   - 修正 volume 挂载路径为 `/workspace/ComfyUI:/workspace/ComfyUI`
+   - 修正 volume 挂载路径为 `/runpod-volume/ComfyUI:/runpod-volume/ComfyUI`
 4. **超时配置**：延长 ComfyUI 初始化超时到 5 分钟，检测间隔 30 秒
 5. **调试增强**：添加了 debug_start.sh 脚本用于诊断容器启动问题
 
 ### 已知依赖要求
-ComfyUI 虚拟环境 (`/workspace/ComfyUI/com_venv`) 必须预装以下包：
+ComfyUI 虚拟环境 (`/runpod-volume/ComfyUI/com_venv`) 必须预装以下包：
 - runpod
 - requests  
 - websocket-client
@@ -61,7 +61,7 @@ This is a RunPod serverless worker for ComfyUI - it allows running ComfyUI workf
    - Returns results as base64 strings or S3 URLs
 
 2. **src/start.sh** - Startup script that:
-   - Detects and activates ComfyUI from network volume at `/workspace/ComfyUI`
+   - Detects and activates ComfyUI from network volume at `/runpod-volume/ComfyUI`
    - Starts ComfyUI server on port 8188
    - Launches the RunPod handler
 
@@ -72,8 +72,8 @@ This is a RunPod serverless worker for ComfyUI - it allows running ComfyUI workf
 
 ### Important Paths
 
-- ComfyUI installation: `/workspace/ComfyUI` (from network volume)
-- Virtual environment: `/workspace/ComfyUI/com_venv`
+- ComfyUI installation: `/runpod-volume/ComfyUI` (from network volume)
+- Virtual environment: `/runpod-volume/ComfyUI/com_venv`
 - Test workflows: `test_resources/workflows/`
 - Test input example: `test_input.json`
 
@@ -183,8 +183,8 @@ This project works with ComfyUI, a node-based interface for Stable Diffusion and
 
 ## Development Notes
 
-- **关键依赖**：Worker 期望 ComfyUI 已经预装在 network volume 的 `/workspace/ComfyUI` 目录
-- **虚拟环境**：ComfyUI 的虚拟环境应该位于 `/workspace/ComfyUI/com_venv`
+- **关键依赖**：Worker 期望 ComfyUI 已经预装在 network volume 的 `/runpod-volume/ComfyUI` 目录
+- **虚拟环境**：ComfyUI 的虚拟环境应该位于 `/runpod-volume/ComfyUI/com_venv`
 - WebSocket connection management is critical - includes reconnection logic and diagnostics
 - Images are processed as base64 strings with size limits (10MB for /run, 20MB for /runsync)
 - Test resources include example workflows for different models (flux, sdxl, sd3)
