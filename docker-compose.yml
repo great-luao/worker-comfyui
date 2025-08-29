@@ -1,7 +1,7 @@
 services:
-  infinite-talk-comfyui-worker:
+  comfyui-worker:
     build: .
-    container_name: infinite-talk-worker
+    container_name: worker-comfyui
     environment:
       - SERVE_API_LOCALLY=true
       - COMFY_LOG_LEVEL=INFO
@@ -9,7 +9,7 @@ services:
       - "8000:8000"
       - "8188:8188"
     volumes:
-      - ./data/runpod-volume:/workspace
+      - /workspace/ComfyUI:/workspace/ComfyUI
     deploy:
       resources:
         reservations:

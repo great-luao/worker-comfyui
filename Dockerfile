@@ -49,8 +49,7 @@ RUN python3.12 -m pip install --upgrade pip setuptools wheel 2>/dev/null || true
 # Set working directory to root
 WORKDIR /
 
-# Copy model path configuration (will be placed in the volume later)
-COPY src/extra_model_paths.yaml /tmp/extra_model_paths.yaml
+# Extra model paths removed - using ComfyUI's default model paths from volume
 
 # === COMMENTED OUT: Dependencies are pre-installed in ComfyUI's venv from volume ===
 # # Install Python runtime dependencies for the handler

@@ -49,6 +49,18 @@ This is a RunPod serverless worker for ComfyUI - it allows running ComfyUI workf
 
 ## Common Commands
 
+### Git Operations
+```bash
+# Push to GitHub using SSH key (in Pod/container environment)
+GIT_SSH_COMMAND="ssh -i /tmp/id_github_temp -o StrictHostKeyChecking=no" git push origin main
+
+# Pull from GitHub using SSH key
+GIT_SSH_COMMAND="ssh -i /tmp/id_github_temp -o StrictHostKeyChecking=no" git pull origin main
+
+# Note: This method bypasses host key verification and directly uses the SSH key,
+# which is ideal for container environments where SSH configuration is ephemeral
+```
+
 ### Testing
 ```bash
 # Run unit tests

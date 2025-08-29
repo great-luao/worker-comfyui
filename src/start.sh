@@ -50,19 +50,18 @@ $PYTHON_CMD -c "import torch; print(f'  CUDA Available: {torch.cuda.is_available
 
 # Verify API dependencies are installed (no installation, just check)
 echo "📥 Verifying API dependencies..."
-if ! $PYTHON_CMD -c "import runpod; import requests; import websocket" 2>/dev/null; then
+# Use full path to ensure we're using the correct Python from venv
+if ! /workspace/ComfyUI/com_venv/bin/python -c "import runpod; import requests; import websocket" 2>/dev/null; then
     echo "❌ ERROR: Required API dependencies not found in virtual environment!"
-    echo "Please install: runpod, requests, websocket-client"
-    echo "Run: source /workspace/ComfyUI/com_venv/bin/activate && pip install runpod requests websocket-client"
+    echo "Please ensure the following packages are installed in /workspace/ComfyUI/com_venv:"
+    echo "  - runpod (with its dependencies: paramiko, aiohttp-retry, boto3, fastapi)"
+    echo "  - requests"
+    echo "  - websocket-client"
     exit 1
 fi
 echo "✅ All API dependencies verified"
 
-# Copy extra model paths if exists
-if [ -f "/tmp/extra_model_paths.yaml" ] && [ -d "$COMFYUI_PATH" ]; then
-    cp /tmp/extra_model_paths.yaml $COMFYUI_PATH/
-    echo "✅ Copied extra_model_paths.yaml"
-fi
+# Extra model paths removed - using ComfyUI's default model paths
 
 # Set ComfyUI-Manager to offline mode if exists
 if [ -d "$COMFYUI_PATH/custom_nodes/ComfyUI-Manager" ]; then
@@ -99,8 +98,8 @@ fi
 
 # Wait for ComfyUI to be ready with better feedback
 echo "⏳ Waiting for ComfyUI server to be ready on port 8188..."
-MAX_WAIT=60  # Maximum 60 seconds wait time
-WAIT_INTERVAL=2
+MAX_WAIT=300  # Maximum 5 minutes wait time
+WAIT_INTERVAL=30  # Check every 30 seconds
 ELAPSED=0
 
 while [ $ELAPSED -lt $MAX_WAIT ]; do
@@ -119,13 +118,13 @@ while [ $ELAPSED -lt $MAX_WAIT ]; do
         exit 1
     fi
     
-    echo "  Waiting... (${ELAPSED}s / ${MAX_WAIT}s)"
+    echo "  Waiting... (${ELAPSED}s / ${MAX_WAIT}s) - checking every ${WAIT_INTERVAL}s"
     sleep $WAIT_INTERVAL
     ELAPSED=$((ELAPSED + WAIT_INTERVAL))
 done
 
 if [ $ELAPSED -ge $MAX_WAIT ]; then
-    echo "❌ ERROR: ComfyUI failed to start within ${MAX_WAIT} seconds!"
+    echo "❌ ERROR: ComfyUI failed to start within ${MAX_WAIT} seconds (5 minutes)!"
     echo "Checking if process is still running..."
     if kill -0 $COMFY_PID 2>/dev/null; then
         echo "Process is running but not responding on port 8188"
