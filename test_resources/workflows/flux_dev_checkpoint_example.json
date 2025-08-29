@@ -1,120 +1,126 @@
 {
+  "5": {
+      "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+      },
+      "class_type": "EmptyLatentImage",
+      "_meta": {
+      "title": "Empty Latent Image"
+      }
+  },
   "6": {
-    "inputs": {
-      "text": "cute anime girl with massive fluffy fennec ears and a big fluffy tail blonde messy long hair blue eyes wearing a maid outfit with a long black gold leaf pattern dress and a white apron mouth open placing a fancy black forest cake with candles on top of a dinner table of an old dark Victorian mansion lit by candlelight with a bright window to the foggy forest and very expensive stuff everywhere there are paintings on the walls",
-      "clip": [
-        "30",
-        1
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Positive Prompt)"
-    }
+      "inputs": {
+      "text": "grey cat wearing a harry potter hat and programming in javascript in its ultramodern computer",
+      "clip": ["11", 0]
+      },
+      "class_type": "CLIPTextEncode",
+      "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+      }
   },
   "8": {
-    "inputs": {
-      "samples": [
-        "31",
-        0
-      ],
-      "vae": [
-        "30",
-        2
-      ]
-    },
-    "class_type": "VAEDecode",
-    "_meta": {
+      "inputs": {
+      "samples": ["13", 0],
+      "vae": ["10", 0]
+      },
+      "class_type": "VAEDecode",
+      "_meta": {
       "title": "VAE Decode"
-    }
+      }
   },
   "9": {
-    "inputs": {
+      "inputs": {
       "filename_prefix": "ComfyUI",
-      "images": [
-        "8",
-        0
-      ]
-    },
-    "class_type": "SaveImage",
-    "_meta": {
+      "images": ["8", 0]
+      },
+      "class_type": "SaveImage",
+      "_meta": {
       "title": "Save Image"
-    }
+      }
   },
-  "27": {
-    "inputs": {
-      "width": 512,
-      "height": 512,
-      "batch_size": 1
-    },
-    "class_type": "EmptySD3LatentImage",
-    "_meta": {
-      "title": "EmptySD3LatentImage"
-    }
+  "10": {
+      "inputs": {
+      "vae_name": "ae.safetensors"
+      },
+      "class_type": "VAELoader",
+      "_meta": {
+      "title": "Load VAE"
+      }
   },
-  "30": {
-    "inputs": {
-      "ckpt_name": "flux1-dev-fp8.safetensors"
-    },
-    "class_type": "CheckpointLoaderSimple",
-    "_meta": {
-      "title": "Load Checkpoint"
-    }
+  "11": {
+      "inputs": {
+      "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_name2": "clip_l.safetensors",
+      "type": "flux"
+      },
+      "class_type": "DualCLIPLoader",
+      "_meta": {
+      "title": "DualCLIPLoader"
+      }
   },
-  "31": {
-    "inputs": {
-      "seed": 150959564782347,
-      "steps": 10,
-      "cfg": 1,
-      "sampler_name": "euler",
-      "scheduler": "simple",
+  "12": {
+      "inputs": {
+      "unet_name": "flux1-dev.safetensors",
+      "weight_dtype": "fp8_e4m3fn"
+      },
+      "class_type": "UNETLoader",
+      "_meta": {
+      "title": "Load Diffusion Model"
+      }
+  },
+  "13": {
+      "inputs": {
+      "noise": ["25", 0],
+      "guider": ["22", 0],
+      "sampler": ["16", 0],
+      "sigmas": ["17", 0],
+      "latent_image": ["5", 0]
+      },
+      "class_type": "SamplerCustomAdvanced",
+      "_meta": {
+      "title": "SamplerCustomAdvanced"
+      }
+  },
+  "16": {
+      "inputs": {
+      "sampler_name": "euler"
+      },
+      "class_type": "KSamplerSelect",
+      "_meta": {
+      "title": "KSamplerSelect"
+      }
+  },
+  "17": {
+      "inputs": {
+      "scheduler": "sgm_uniform",
+      "steps": 4,
       "denoise": 1,
-      "model": [
-        "30",
-        0
-      ],
-      "positive": [
-        "35",
-        0
-      ],
-      "negative": [
-        "33",
-        0
-      ],
-      "latent_image": [
-        "27",
-        0
-      ]
-    },
-    "class_type": "KSampler",
-    "_meta": {
-      "title": "KSampler"
-    }
+      "model": ["12", 0]
+      },
+      "class_type": "BasicScheduler",
+      "_meta": {
+      "title": "BasicScheduler"
+      }
   },
-  "33": {
-    "inputs": {
-      "text": "",
-      "clip": [
-        "30",
-        1
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Negative Prompt)"
-    }
+  "22": {
+      "inputs": {
+      "model": ["12", 0],
+      "conditioning": ["6", 0]
+      },
+      "class_type": "BasicGuider",
+      "_meta": {
+      "title": "BasicGuider"
+      }
   },
-  "35": {
-    "inputs": {
-      "guidance": 3.5,
-      "conditioning": [
-        "6",
-        0
-      ]
-    },
-    "class_type": "FluxGuidance",
-    "_meta": {
-      "title": "FluxGuidance"
-    }
+  "25": {
+      "inputs": {
+      "noise_seed": 108076821791990
+      },
+      "class_type": "RandomNoise",
+      "_meta": {
+      "title": "RandomNoise"
+      }
   }
 }
